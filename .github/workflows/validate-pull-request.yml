@@ -1,8 +1,17 @@
 name: Validate Pull Request
 
 on:
-  pull_request:
-    types: [opened, edited]
+  workflow_call:
+    input:
+      pr_number:
+        requeired: true
+        type: number
+      repo:
+        requeired: true
+        type: string
+    secrets:
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
   validate:
