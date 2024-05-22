@@ -1,0 +1,29 @@
+name: Validate Pull Request
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run validation script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/scripts/; python pull-request-validation.py ${{ github.event.pull_request.number }} ${{ github.repository }} ${{ secrets.GITHUB_TOKEN }}
