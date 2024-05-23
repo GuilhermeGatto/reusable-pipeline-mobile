@@ -8,36 +8,56 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  swiftlint: 
-    runs-on: macOS-latest
 
-    steps:
+  read-pipeline-config:
+    runs-on: ubuntu-latest
+
+    outputs: 
+      skip_lint: $ {{ steps.get-config-outputs.skip_lint }}
+      skip_test: $ {{ steps.get-config-outputs.skip_test }}
+      skip_build: $ {{ steps.get-config-outputs.skip_build }}
+    
+    steps: 
       - name: Checkout codebase from branch 
         uses: actions/checkout@v4
 
-      - name: Get Config
-        id: config
+      - name: install yq
+        run: sudo apt-get install -yq jq
+
+      - name: read file
+        id: get-config
         run: |
-          echo "skip_lint=$(yq e '.skip.lint' pipeline-config.yml)" >> $GITHUB_ENV
+          skip_lint=$(yq e '.skip.lint' pipeline-config.yml)"
+          skip_test=$(yq e '.skip.test' pipeline-config.yml)"
+          skip_build=$(yq e '.skip.build' pipeline-config.yml)"
+
+          echo "::set-output name=skip_lint::$skip_lint"
+          echo "::set-output name=skip_test::$skip_test"
+          echo "::set-output name=skip_build::$skip_build"
+
+  swiftlint: 
+    needs: read-pipeline-config
+    if: ${{ needs.read-pipeline-config.outputs.skip_lint != 'true' }}
+    runs-on: macOS-latest
+    
+    steps:
+      - name: Checkout codebase from branch 
+        uses: actions/checkout@v4
 
       - name: Install Swiftlint
         run: brew install swiftlint
-        if: env.skip_lint == 'false'
         
       - name: Run SwifLint
         run: swiftlint lint
-        if: env.skip_lint == 'false'
+
   build: 
+    needs: read-pipeline-config
+    if: ${{ needs.read-pipeline-config.outputs.skip_build != 'true' }}
     runs-on: macOS-latest
 
     steps:
       - name: Checkout codebase from branch 
         uses: actions/checkout@v4
-
-      - name: Get Config
-        id: config
-        run: |
-          echo "skip_build=$(yq e '.skip.build' pipeline-config.yml)" >> $GITHUB_ENV
 
       - name: Find and set the first .xcworkspace or .xcodeproj path
         id: find-project
@@ -82,19 +102,15 @@ jobs:
             echo "Building project: $PROJECT_PATH with scheme: $SCHEME_NAME"
             xcodebuild -project "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
           fi
-        if: env.skip_build == 'false'
 
   test: 
+    needs: read-pipeline-config
+    if: ${{ needs.read-pipeline-config.outputs.skip_test != 'true' }}
     runs-on: macOS-latest
 
     steps:
       - name: Checkout codebase from branch 
         uses: actions/checkout@v4
-        
-      - name: Get Config
-        id: config
-        run: |
-          echo "skip_test=$(yq e '.skip.test' pipeline-config.yml)" >> $GITHUB_ENV
 
       - name: Find and set the first .xcworkspace or .xcodeproj path
         id: find-project
@@ -139,4 +155,3 @@ jobs:
               echo "Building project: $PROJECT_PATH with scheme: $SCHEME_NAME"
               xcodebuild -project "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
           fi
-        if: env.skip_test == 'false'
