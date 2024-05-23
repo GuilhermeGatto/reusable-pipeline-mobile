@@ -30,13 +30,13 @@ jobs:
 
       - name: Download script
         run: |
-          curl -o $PWD/validate_pr.py https://github.com/GuilhermeGatto/reusable-pipeline-mobile/raw/master/.github/scripts/pull-request-validation.py
-
+          curl -o validate_pr.py https://raw.githubusercontent.com/GuilhermeGatto/reusable-pipeline-mobile/master/.github/scripts/pull-request-validation.py
+          
       - name: Print Script Content
-        run: less $PWD/validate_pr.py
-
+        run: less validate_pr.py
+        
       - name: Run validation script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python $PWD/validate_pr.py ${{ github.event.pull_request.number }} ${{ github.repository }} ${{ secrets.GITHUB_TOKEN }}
+          python validate_pr.py ${{ github.event.pull_request.number }} ${{ github.repository }} ${{ secrets.GITHUB_TOKEN }}
