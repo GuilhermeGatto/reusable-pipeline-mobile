@@ -12,11 +12,20 @@ jobs:
       - name: Checkout codebase from branch 
         uses: actions/checkout@v4
 
+      - name: Get Config
+        id: config
+        run: |
+          echo "skip_lint=$(yq e 'skip.lint' pipeline-config.yml)" >> $GITHUB_ENV
+          echo "skip_test=$(yq e 'skip.test' pipeline-config.yml)" >> $GITHUB_ENV
+          echo "skip_build=$(yq e 'skip.build' pipeline-config.yml)" >> $GITHUB_ENV
+
       - name: Install Swiftlint
         run: brew install swiftlint
+        if: env.skip_lint == 'false'
         
       - name: Run SwifLint
         run: swiftlint lint
+        if: env.skip_lint == 'false'
 
       - name: Find and set the first .xcworkspace or .xcodeproj path
         id: find-project
@@ -61,3 +70,25 @@ jobs:
             echo "Building project: $PROJECT_PATH with scheme: $SCHEME_NAME"
             xcodebuild -project "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
           fi
+        if: env.skip_build == 'false'
+
+      - name: Test Xcode project or workspace
+        run: |
+          # Retrieve the project path and type from the previous step
+          PROJECT_PATH=${{ steps.find-project.outputs.project_path }}
+          PROJECT_TYPE=${{ steps.find-project.outputs.project_type }}
+            
+          # Extract the scheme name
+          if [ "$PROJECT_TYPE" == "xcworkspace" ]; then
+              SCHEME_NAME=$(xcodebuild -list -workspace "$PROJECT_PATH" | grep -A 1 'Schemes:' | tail -n 1 | xargs)
+              echo "Building workspace: $PROJECT_PATH with scheme: $SCHEME_NAME"
+              xcodebuild -workspace "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
+          else
+              SCHEME_NAME=$(xcodebuild -list -project "$PROJECT_PATH" | grep -A 1 'Schemes:' | tail -n 1 | xargs)
+              echo "Building project: $PROJECT_PATH with scheme: $SCHEME_NAME"
+              xcodebuild -project "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
+          fi
+        if: env.skip_test == 'false'
+
+
+
