@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       pr_number:
-        requeired: true
+        required: true
         type: number
       repo:
-        requeired: true
+        required: true
         type: string
 
 jobs:
