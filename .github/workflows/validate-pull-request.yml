@@ -32,6 +32,9 @@ jobs:
         run: |
           curl -o validate_pr.py https://github.com/GuilhermeGatto/reusable-pipeline-mobile/raw/master/.github/scripts/pull-request-validation.py
 
+      - name: Print Script Content
+        run: less validate_pr.py
+        
       - name: Run validation script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
