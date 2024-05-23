@@ -15,7 +15,7 @@ jobs:
       - name: Get Config
         id: pipeconfig
         run: |
-          echo "config=$(yq e '.skip' pipeline-config.yml)" >> $GITHUB_ENV
+          echo "config=$(yq '.skip' pipeline-config.yml)" >> $GITHUB_ENV
           echo "skip_lint=$(yq e '.skip.lint' pipeline-config.yml)" >> $GITHUB_ENV
           echo "skip_test=$(yq e '.skip.test' pipeline-config.yml)" >> $GITHUB_ENV
           echo "skip_build=$(yq e '.skip.build' pipeline-config.yml)" >> $GITHUB_ENV
