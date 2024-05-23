@@ -11,12 +11,10 @@ jobs:
 
   read-pipeline-config:
     runs-on: ubuntu-latest
-
     outputs: 
       skip_lint: $ {{ steps.get-config-outputs.skip_lint }}
-      skip_test: $ {{ steps.get-config-outputs.skip_test }}
-      skip_build: $ {{ steps.get-config-outputs.skip_build }}
-    
+      skip_test: $ {{ steps.get-config.outputs.skip_test }}
+      skip_build: $ {{ steps.get-config.outputs.skip_build }}
     steps: 
       - name: Checkout codebase from branch 
         uses: actions/checkout@v4
