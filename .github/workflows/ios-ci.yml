@@ -13,8 +13,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Get Config
-        id: config
+        id: pipeconfig
         run: |
+          echo "config=$(yq e '.skip' pipeline-config.yml)" >> $GITHUB_ENV
           echo "skip_lint=$(yq e '.skip.lint' pipeline-config.yml)" >> $GITHUB_ENV
           echo "skip_test=$(yq e '.skip.test' pipeline-config.yml)" >> $GITHUB_ENV
           echo "skip_build=$(yq e '.skip.build' pipeline-config.yml)" >> $GITHUB_ENV
@@ -70,7 +71,7 @@ jobs:
             echo "Building project: $PROJECT_PATH with scheme: $SCHEME_NAME"
             xcodebuild -project "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
           fi
-        if: env.skip_build == 'false'
+        if: env.config.lint == 'false'
 
       - name: Test Xcode project or workspace
         run: |
@@ -88,7 +89,7 @@ jobs:
               echo "Building project: $PROJECT_PATH with scheme: $SCHEME_NAME"
               xcodebuild -project "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
           fi
-        if: env.skip_test == 'false'
+        if: env.env.config.lint == 'false'
 
 
 
