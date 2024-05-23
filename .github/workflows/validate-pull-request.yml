@@ -28,12 +28,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Download script
-        run: |
-          curl -o validate_pr.py https://github.com/GuilhermeGatto/reusable-pipeline-mobile/blob/master/.github/scripts/pull-request-validation.py
+      # - name: Download script
+      #   run: |
+      #     curl -o validate_pr.py https://github.com/GuilhermeGatto/reusable-pipeline-mobile/blob/master/.github/scripts/pull-request-validation.py
 
       - name: Run validation script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python validate_pr.py ${{ github.event.pull_request.number }} ${{ github.repository }} ${{ secrets.GITHUB_TOKEN }}
+        run: ${GITHUB_WORKSPACE}/.github/scripts; python pull-request-validation.py ${{ github.event.pull_request.number }} ${{ github.repository }} ${{ secrets.GITHUB_TOKEN }}
