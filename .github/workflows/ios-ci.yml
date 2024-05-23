@@ -37,8 +37,8 @@ jobs:
 
   swiftlint: 
     needs: read-pipeline-config
-    if: ${{ needs.read-pipeline-config.outputs.skip_lint != 'true' }}
     runs-on: macOS-latest
+    if: ${{ needs.read-pipeline-config.outputs.skip_lint == 'false' }}
     
     steps:
       - name: Checkout codebase from branch 
@@ -52,8 +52,8 @@ jobs:
 
   build: 
     needs: read-pipeline-config
-    if: ${{ needs.read-pipeline-config.outputs.skip_build != 'true' }}
     runs-on: macOS-latest
+    if: ${{ needs.read-pipeline-config.outputs.skip_build == 'false' }}
 
     steps:
       - name: Checkout codebase from branch 
@@ -105,8 +105,8 @@ jobs:
 
   test: 
     needs: read-pipeline-config
-    if: ${{ needs.read-pipeline-config.outputs.skip_test != 'true' }}
     runs-on: macOS-latest
+    if: ${{ needs.read-pipeline-config.outputs.skip_test == 'false' }}
 
     steps:
       - name: Checkout codebase from branch 
