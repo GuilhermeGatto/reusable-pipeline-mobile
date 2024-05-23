@@ -1,6 +1,6 @@
 import sys
 import re
-import requests
+import requests # type: ignore
 
 def validate_pr_title(title):
     # Example: PR title must start with a feat ticket ID (e.g., "feat-1234: ")
