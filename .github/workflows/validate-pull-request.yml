@@ -32,4 +32,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd .github/scripts/; python pull-request-validation.py ${{ github.event.pull_request.number }} ${{ github.repository }} ${{ secrets.GITHUB_TOKEN }}
+          pwd; cd .github/scripts/; python pull-request-validation.py ${{ github.event.pull_request.number }} ${{ github.repository }} ${{ secrets.GITHUB_TOKEN }}
