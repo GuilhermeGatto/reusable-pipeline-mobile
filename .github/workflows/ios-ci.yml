@@ -27,9 +27,9 @@ jobs:
       - name: read file
         id: get-config
         run: |
-          skip_lint=$(yq e '.skip.lint' pipeline-config.yml)"
-          skip_test=$(yq e '.skip.test' pipeline-config.yml)"
-          skip_build=$(yq e '.skip.build' pipeline-config.yml)"
+          skip_lint=$(yq e '.skip.lint' pipeline-config.yml)
+          skip_test=$(yq e '.skip.test' pipeline-config.yml)
+          skip_build=$(yq e '.skip.build' pipeline-config.yml)
 
           echo "::set-output name=skip_lint::$skip_lint"
           echo "::set-output name=skip_test::$skip_test"
