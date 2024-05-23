@@ -3,9 +3,8 @@ name: CI
 on: 
     workflow_call:
 
-
-concurrency: 
-  group: ${{ github.head_ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -91,7 +90,7 @@ jobs:
         id: config
         run: |
           echo "skip_test=$(yq e '.skip.test' pipeline-config.yml)" >> $GITHUB_ENV
-          
+
       - name: Find and set the first .xcworkspace or .xcodeproj path
         id: find-project
         run: |
