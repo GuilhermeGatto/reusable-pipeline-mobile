@@ -31,9 +31,9 @@ jobs:
           skip_test=$(yq e '.skip.test' pipeline-config.yml)
           skip_build=$(yq e '.skip.build' pipeline-config.yml)
 
-          echo "::set-output name=skip_lint::$skip_lint"
-          echo "::set-output name=skip_test::$skip_test"
-          echo "::set-output name=skip_build::$skip_build"
+          echo "skip_lint=$skip_lint" >> $GITHUB_OUTPUT
+          echo "::skip_test=$skip_test"  >> $GITHUB_OUTPUT
+          echo "::skip_build=$skip_build"  >> $GITHUB_OUTPUT
 
   swiftlint: 
     needs: read-pipeline-config
