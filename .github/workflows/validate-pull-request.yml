@@ -2,7 +2,7 @@ name: Validate Pull Request
 
 on:
   workflow_call:
-    input:
+    inputs:
       pr_number:
         requeired: true
         type: number
