@@ -9,6 +9,7 @@ concurrency:
 
 jobs:
   read-pipeline-config:
+    name: Get Read pipeline-config.yml
     runs-on: ubuntu-latest
     outputs: 
       skip_lint: ${{ steps.get-config.outputs.skip_lint }}
@@ -29,10 +30,11 @@ jobs:
           skip_build=$(yq e '.skip.build' pipeline-config.yml)
 
           echo "skip_lint=$skip_lint" >> $GITHUB_OUTPUT
-          echo "skip_test=$skip_test"  >> $GITHUB_OUTPUT
-          echo "skip_build=$skip_build"  >> $GITHUB_OUTPUT
+          echo "skip_test=$skip_test" >> $GITHUB_OUTPUT
+          echo "skip_build=$skip_build" >> $GITHUB_OUTPUT
 
-  swiftlint: 
+  swiftlint:
+    name: Lint
     needs: read-pipeline-config
     runs-on: macOS-latest
     if: ${{ needs.read-pipeline-config.outputs.skip_lint == 'false' }}
@@ -48,6 +50,7 @@ jobs:
         run: swiftlint lint
 
   build: 
+    name: Build
     needs: read-pipeline-config
     runs-on: macOS-latest
     if: ${{ needs.read-pipeline-config.outputs.skip_build == 'false' }}
@@ -101,6 +104,7 @@ jobs:
           fi
 
   test: 
+    name: Test
     needs: read-pipeline-config
     runs-on: macOS-latest
     if: ${{ needs.read-pipeline-config.outputs.skip_test == 'false' }}
