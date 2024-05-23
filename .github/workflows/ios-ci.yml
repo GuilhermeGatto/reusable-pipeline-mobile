@@ -1,0 +1,63 @@
+name: CI
+
+on: 
+    workflow_call:
+
+jobs:
+
+  build: 
+    runs-on: macOS-latest
+
+    steps:
+      - name: Checkout codebase from branch 
+        uses: actions/checkout@v4
+
+      - name: Install Swiftlint
+        run: brew install swiftlint
+        
+      - name: Run SwifLint
+        run: swiftlint lint
+
+      - name: Find and set the first .xcworkspace or .xcodeproj path
+        id: find-project
+        run: |
+          # Try to find the first .xcworkspace
+          XCWORKSPACE_PATH=$(find . -name "*.xcworkspace" | head -n 1)
+          
+          # If no .xcworkspace found, find the first .xcodeproj
+          if [ -z "$XCWORKSPACE_PATH" ]; then
+            XCODEPROJ_PATH=$(find . -name "*.xcodeproj" | head -n 1)
+            echo "No .xcworkspace found, found Xcode project: $XCODEPROJ_PATH"
+            
+            # Check if a .xcodeproj was found
+            if [ -z "$XCODEPROJ_PATH" ]; then
+              echo "No .xcodeproj file found!"
+              exit 1
+            fi
+
+            # Set the .xcodeproj path as an output
+            echo "::set-output name=project_path::$XCODEPROJ_PATH"
+            echo "::set-output name=project_type::xcodeproj"
+          else
+            echo "Found Xcode workspace: $XCWORKSPACE_PATH"
+            # Set the .xcworkspace path as an output
+            echo "::set-output name=project_path::$XCWORKSPACE_PATH"
+            echo "::set-output name=project_type::xcworkspace"
+          fi
+
+      - name: Build Xcode project or workspace
+        run: |
+          # Retrieve the project path and type from the previous step
+          PROJECT_PATH=${{ steps.find-project.outputs.project_path }}
+          PROJECT_TYPE=${{ steps.find-project.outputs.project_type }}
+          
+          # Extract the scheme name
+          if [ "$PROJECT_TYPE" == "xcworkspace" ]; then
+            SCHEME_NAME=$(xcodebuild -list -workspace "$PROJECT_PATH" | grep -A 1 'Schemes:' | tail -n 1 | xargs)
+            echo "Building workspace: $PROJECT_PATH with scheme: $SCHEME_NAME"
+            xcodebuild -workspace "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
+          else
+            SCHEME_NAME=$(xcodebuild -list -project "$PROJECT_PATH" | grep -A 1 'Schemes:' | tail -n 1 | xargs)
+            echo "Building project: $PROJECT_PATH with scheme: $SCHEME_NAME"
+            xcodebuild -project "$PROJECT_PATH" -scheme "$SCHEME_NAME" build CODE_SIGNING_ALLOWED=NO
+          fi
